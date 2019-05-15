@@ -38,7 +38,7 @@ async def checkIn(sid,data):
     sio.emit("checkedIn",{"ok":True},room=sid)
 
 @sio.on('checkOut')
-async def checkIn(sid,data):
+async def checkOut(sid,data):
     data=json.loads(data)
     checkedIn = False
     i=0
