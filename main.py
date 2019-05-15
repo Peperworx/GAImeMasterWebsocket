@@ -70,6 +70,8 @@ def testThread():
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         result = loop.run_until_complete(reportInvites())
+        time.sleep(10)
+        exit(0)
     except:
         global success
         success = False
