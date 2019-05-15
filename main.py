@@ -6,6 +6,7 @@ import socketio
 import collections
 import json
 import os
+import sys
 import asyncio
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
@@ -62,8 +63,29 @@ async def reportInvites():
                     client = item
             if client != None:
                 sio.emit("invitedToParty",room=client["ClientSID"])
-if __name__ == "__main__":
+success=True
+def testThread():
+    try:
+        app.run(port=3435)
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        result = loop.run_until_complete(reportInvites())
+    except:
+        global success
+        success = False
+        exit(1)
+if __name__ == "__main__" and len(sys.argv) = 1:
     app.run(port=3435)
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     result = loop.run_until_complete(reportInvites())
+elif len(sys.argv) > 1:
+    if sys.argv[1] == "test":
+        tThread =threading.Thread(target=testThread)
+        tThread.start()
+        tThread.join()
+        time.sleep(10)
+        if success:
+            exit(0)
+        else:
+            exit(1)
