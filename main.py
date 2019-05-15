@@ -14,7 +14,7 @@ from flask_socketio import SocketIO, emit
 parties = []    
 invites = []
 clients = []
-
+from multiprocessing import Process
 app = Flask(__name__)
 sio = SocketIO(app)
 
@@ -64,18 +64,8 @@ async def reportInvites():
             if client != None:
                 sio.emit("invitedToParty",room=client["ClientSID"])
 success=True
-def testThread():
-    try:
-        app.run(port=3435)
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        result = loop.run_until_complete(reportInvites())
-        time.sleep(10)
-        exit(0)
-    except:
-        global success
-        success = False
-        exit(1)
+print(len(sys.argv))
+print(sys.argv)
 if __name__ == "__main__" and len(sys.argv) == 1:
     app.run(port=3435)
     loop = asyncio.new_event_loop()
@@ -83,11 +73,14 @@ if __name__ == "__main__" and len(sys.argv) == 1:
     result = loop.run_until_complete(reportInvites())
 elif len(sys.argv) > 1:
     if sys.argv[1] == "test":
-        tThread =threading.Thread(target=testThread)
-        tThread.start()
-        tThread.join()
+        success=True
+        print("Testing")
+        server = Process(target=lambda: app.run(port=3435))
+        server.start()
         time.sleep(10)
-        if success:
+        if server.is_alive():
+            server.terminate()
+            server.join()
             exit(0)
         else:
             exit(1)
