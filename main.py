@@ -74,7 +74,7 @@ def testThread():
         global success
         success = False
         exit(1)
-if __name__ == "__main__" and len(sys.argv) = 1:
+if __name__ == "__main__" and len(sys.argv) == 1:
     app.run(port=3435)
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
