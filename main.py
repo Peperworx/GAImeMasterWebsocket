@@ -6,76 +6,79 @@ import socketio
 import collections
 import json
 import os
+import hashlib
 import sys
 import asyncio
-from flask import Flask, render_template
+import npyscreen
+from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
 
 parties = []    
 invites = []
 clients = []
+clientDict = {}
 from multiprocessing import Process
 app = Flask(__name__)
 sio = SocketIO(app)
 
+@sio.on('checkIn')
+def checkIn(data):
+    print("%s connected" % (request.sid))
+    clients.append({"ClientSID":request.sid,"ClientUNAME":data})
+    clientDict[request.sid] = len(clients)-1
+    print(clients)
+    
+@sio.on('disconnect')
+def disconnect():
+    print("%s disconnected" % (request.sid))
+    del clients[clientDict[request.sid]]
+    print(clients)
+
+@app.route("/")
+def index():
+    return open("test.html","r").read()
 
 @sio.on('startingParty')
-async def startingParty(sid,data):
+def startingParty(data):
     data=json.loads(data)
+    sid = request.sid
     parties.append({"PartyID":os.urandom(32),"OwnerSID":sid,"OwnerUNAME":data[0],"Members":[sid]})
 
 @sio.on('invitingToParty')
-async def inviteingToParty(sid,data):
+def invitingToParty(data):
     data=json.loads(data)
+    sid = request.sid
     for item in parties:
         if item["OwnerSID"] == sid:
-           invites.append({"username":data[0],"partyid":item["PartyID"]})
-
-@sio.on('checkIn')
-async def checkIn(sid,data):
-    data=json.loads(data)
-    sio.save_session(sid,data)
-    sio.emit("checkedIn",{"ok":True},room=sid)
-
-@sio.on('checkOut')
-async def checkOut(sid,data):
-    data=json.loads(data)
-    checkedIn = False
-    i=0
-    for item in clients:
-        if item["ClientSID"] == sid:
-            del clients[i]
-            checkedIn=True
-        i+=1
-    sio.emit("checkedOut",{"checkedIn":checkedIn},roon=sid)
-@sio.on('connect')
-def connect(sio,environ):
-    print(environ)
-
-async def reportInvites():
+           invites.append({"username":data[0],"partyid":item["PartyID"],"OwnerUNAME":item["OwnerUNAME"]})
+def reportInvites():
     while True:
         i=0
-        for item in invites:
-            uname = item["username"]
+        for itm in invites:
+            uname = itm["username"]
             client = None
             for item in clients:
                 if item["ClientUNAME"] == uname:
                     client = item
             if client != None:
-                sio.emit("invitedToParty",room=client["ClientSID"])
+                sio.emit("invitedToParty", {"PartyID":itm["partyid"],"OwnerUNAME":itm["OwnerUNAME"],"Party":itm},room=client["ClientSID"])
+                del clients[i]
+                print("Invited "+item["ClientUNAME"])
+
+
 success=True
 print(len(sys.argv))
 print(sys.argv)
 if __name__ == "__main__" and len(sys.argv) == 1:
-    app.run(port=3435)
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    result = loop.run_until_complete(reportInvites())
+    reportingThread = threading.Thread(target=reportInvites)
+    reportingThread.start()
+    app.run(port=3435,debug=True)
+    reportingThread.join()
 elif len(sys.argv) > 1:
     if sys.argv[1] == "test":
         success=True
         print("Testing")
-        server = Process(target=lambda: app.run(port=3435))
+        server = Process(target=lambda: app.run(port=3435,debug=True))
         server.start()
         time.sleep(10)
         if server.is_alive():
