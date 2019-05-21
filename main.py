@@ -2,14 +2,12 @@
 import threading
 import time
 import queue
-import socketio
 import collections
 import json
 import os
 import hashlib
 import sys
 import asyncio
-import npyscreen
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
 
@@ -42,7 +40,7 @@ def index():
 def startingParty(data):
     data=json.loads(data)
     sid = request.sid
-    parties.append({"PartyID":os.urandom(32),"OwnerSID":sid,"OwnerUNAME":data[0],"Members":[sid]})
+    parties.append({"PartyID":os.urandom(32),"OwnerSID":sid,"OwnerUNAME":data[0],"Members":[[data[0],sid]]})
 
 @sio.on('invitingToParty')
 def invitingToParty(data):
@@ -51,6 +49,23 @@ def invitingToParty(data):
     for item in parties:
         if item["OwnerSID"] == sid:
            invites.append({"username":data[0],"partyid":item["PartyID"],"OwnerUNAME":item["OwnerUNAME"]})
+
+@sio.on('joinParty')
+def joinParty(data):
+    data = json.loads(data)
+    partyId =  data[0]
+    i=0
+    party = ""
+    for item in parties:
+        if item["PartyID"] == partyId:
+            parties[i]["Members"].append([data[1],data[0]])
+            party = item
+        i+=1
+    if party != "":
+        sio.emit("joiningParty", [False,data[1],sid], room=party["OwnerSID"])
+        sio.emit("joiningParty", [True,partyID], room=sid)
+    else:
+        sio.emit("partyNotAvailible",[partyId],room=sid)
 def reportInvites():
     while True:
         i=0
@@ -62,8 +77,9 @@ def reportInvites():
                     client = item
             if client != None:
                 sio.emit("invitedToParty", {"PartyID":itm["partyid"],"OwnerUNAME":itm["OwnerUNAME"],"Party":itm},room=client["ClientSID"])
-                del clients[i]
-                print("Invited "+item["ClientUNAME"])
+                del invites[i]
+                print("Invited "+uname+" or: "+client["ClientSID"])
+            i+=1
 
 
 success=True
@@ -72,13 +88,13 @@ print(sys.argv)
 if __name__ == "__main__" and len(sys.argv) == 1:
     reportingThread = threading.Thread(target=reportInvites)
     reportingThread.start()
-    app.run(port=3435,debug=True)
+    sio.run(app,port=3435,debug=True)
     reportingThread.join()
 elif len(sys.argv) > 1:
     if sys.argv[1] == "test":
         success=True
         print("Testing")
-        server = Process(target=lambda: app.run(port=3435,debug=True))
+        server = Process(target=lambda: sio.run(app,port=3435,debug=False))
         server.start()
         time.sleep(10)
         if server.is_alive():
