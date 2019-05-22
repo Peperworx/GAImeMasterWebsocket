@@ -88,13 +88,13 @@ print(sys.argv)
 if __name__ == "__main__" and len(sys.argv) == 1:
     reportingThread = threading.Thread(target=reportInvites)
     reportingThread.start()
-    sio.run(app,port=3435,debug=True)
+    sio.run(app,port=3435,debug=True,async_mode="gevent")
     reportingThread.join()
 elif len(sys.argv) > 1:
     if sys.argv[1] == "test":
         success=True
         print("Testing")
-        server = Process(target=lambda: sio.run(app,port=3435,debug=False))
+        server = Process(target=lambda: sio.run(app,port=3435,debug=False,async_mode="gevent"))
         server.start()
         time.sleep(10)
         if server.is_alive():
