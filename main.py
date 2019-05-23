@@ -36,11 +36,12 @@ def disconnect():
 def index():
     return open("test.html","r").read()
 
+
 @sio.on('startingParty')
 def startingParty(data):
     data=json.loads(data)
     sid = request.sid
-    parties.append({"PartyID":os.urandom(32),"OwnerSID":sid,"OwnerUNAME":data[0],"Members":[[data[0],sid]]})
+    parties.append({"PartyID":hashlib.sha224(os.urandom(16)).hexdigest(),"OwnerSID":sid,"OwnerUNAME":data[0],"Members":[[data[0],sid]]})
 
 @sio.on('invitingToParty')
 def invitingToParty(data):
@@ -76,7 +77,7 @@ def reportInvites():
                 if item["ClientUNAME"] == uname:
                     client = item
             if client != None:
-                sio.emit("invitedToParty", {"PartyID":itm["partyid"],"OwnerUNAME":itm["OwnerUNAME"],"Party":itm},room=client["ClientSID"])
+                sio.emit("invitedToParty", {"PartyID":str(itm["partyid"]),"OwnerUNAME":str(itm["OwnerUNAME"]),"Party":str(itm)},room=client["ClientSID"])
                 del invites[i]
                 print("Invited "+uname+" or: "+client["ClientSID"])
             i+=1
@@ -88,7 +89,7 @@ print(sys.argv)
 if __name__ == "__main__" and len(sys.argv) == 1:
     reportingThread = threading.Thread(target=reportInvites)
     reportingThread.start()
-    sio.run(app,port=3435,debug=True)
+    sio.run(app,port=3435,host="0.0.0.0",debug=True)
     reportingThread.join()
 elif len(sys.argv) > 1:
     if sys.argv[1] == "test":
