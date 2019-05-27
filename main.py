@@ -1,5 +1,4 @@
 #! /usr/bin/python3
-import gevent
 import threading
 import time
 import queue
@@ -18,7 +17,7 @@ clients = []
 clientDict = {}
 from multiprocessing import Process
 app = Flask(__name__)
-sio = SocketIO(app,async_mode = 'gevent')
+sio = SocketIO(app,async_mode = 'threading')
 
 @sio.on('checkIn')
 def checkIn(data):
