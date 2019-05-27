@@ -1,6 +1,4 @@
 #! /usr/bin/python3
-import eventlet
-eventlet.monkey_patch()
 import threading
 import time
 import queue
@@ -19,7 +17,7 @@ clients = []
 clientDict = {}
 from multiprocessing import Process
 app = Flask(__name__)
-sio = SocketIO(app)
+sio = SocketIO(app,async_mode = 'eventlet')
 
 @sio.on('checkIn')
 def checkIn(data):
