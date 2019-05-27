@@ -1,4 +1,6 @@
 #! /usr/bin/python3
+import eventlet
+eventlet.monkey_patch()
 import threading
 import time
 import queue
