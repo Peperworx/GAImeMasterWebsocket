@@ -77,7 +77,7 @@ def reportInvites():
                 if item["ClientUNAME"] == uname:
                     client = item
             if client != None:
-                sio.emit("invitedToParty", {"PartyID":str(itm["partyid"]),"OwnerUNAME":str(itm["OwnerUNAME"]),"Party":str(itm)},room=client["ClientSID"])
+                sio.emit("invitedToParty", {"PartyID":str(itm["partyid"]),"OwnerUNAME":json.dumps(itm["OwnerUNAME"]),"Party":json.dumps(itm)},room=client["ClientSID"])
                 del invites[i]
                 print("Invited "+uname+" or: "+client["ClientSID"])
             i+=1
