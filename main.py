@@ -9,7 +9,7 @@ import hashlib
 import sys
 import asyncio
 from flask import Flask, render_template, request
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO, emit, join_room
 
 parties = []    
 invites = []
@@ -41,8 +41,9 @@ def index():
 def startingParty(data):
     data=json.loads(data)
     sid = request.sid
-    parties.append({"PartyID":hashlib.sha224(os.urandom(16)).hexdigest(),"OwnerSID":sid,"OwnerUNAME":data[0],"Members":[[data[0],sid]]})
-
+    id = hashlib.sha224(os.urandom(16)).hexdigest()
+    parties.append({"PartyID":id,"OwnerSID":sid,"OwnerUNAME":data[0],"Members":[[data[0],sid]]})
+    sio.emit("hereIsID", {"id":id})
 @sio.on('invitingToParty')
 def invitingToParty(data):
     data=json.loads(data)
@@ -53,20 +54,28 @@ def invitingToParty(data):
 
 @sio.on('joinParty')
 def joinParty(data):
-    data = json.loads(data)
     partyId =  data[0]
     i=0
     party = ""
     for item in parties:
         if item["PartyID"] == partyId:
-            parties[i]["Members"].append([data[1],data[0]])
+            parties[i]["Members"].append([data[1],request.sid])
             party = item
         i+=1
     if party != "":
-        sio.emit("joiningParty", [False,data[1],sid], room=party["OwnerSID"])
-        sio.emit("joiningParty", [True,partyID], room=sid)
+        for item in party["Members"]:
+            sio.emit("memberJoiningParty", [data[1],request.sid], room=item[0])
+        sio.emit("joiningParty", [True,party], room=request.sid)
     else:
-        sio.emit("partyNotAvailible",[partyId],room=sid)
+        sio.emit("partyNotAvailible",[partyId],room=request.sid)
+
+@sio.on("sendChat")
+def sendChat(data):
+    sio.emit("newMsg", data, room=data["partyID"])
+
+@sio.on("room")
+def joinRoom(data):
+    join_room(data)
 def reportInvites():
     while True:
         i=0
