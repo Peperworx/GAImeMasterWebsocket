@@ -92,13 +92,13 @@ def startingParty(data):
     parties = rget("parties")
     data=json.loads(data)
     sid = request.sid
-    id = hashlib.sha224(os.urandom(16)).hexdigest()
-    parties.append({"PartyID":id,"OwnerSID":sid,"OwnerUNAME":data[0],"Members":[[data[0],sid]]})
+    iden = hashlib.sha224(os.urandom(16)).hexdigest()
+    parties.append({"PartyID":iden,"OwnerSID":sid,"OwnerUNAME":data[0],"Members":[[data[0],sid]]})
     rset("parties", parties)
     del parties
-    sio.emit("hereIsID", {"id":id})
+    sio.emit("hereIsID", {"id":iden})
     chats = rget("chats")
-    chats[id] = []
+    chats[iden] = []
     rset("chats",chats)
     del chats
 
