@@ -7,15 +7,26 @@ import json
 import os
 import hashlib
 import sys
+import redis
 import asyncio
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit, join_room
 
-parties = []    
-invites = []
-clients = []
-games = []
-clientDict = {}
+
+
+
+r = redis.Redis(host='192.168.1.246', port=6379, db=0)
+def rset(key,value):
+    r.set(key, json.dumps(value))
+
+def rget(key):
+    return json.loads(r.get(key))
+
+#parties = []    
+#invites = []
+#clients = []
+#games = []
+#clientDict = {}
 from multiprocessing import Process
 app = Flask(__name__)
 sio = SocketIO(app,async_mode = 'threading')
@@ -23,12 +34,21 @@ sio = SocketIO(app,async_mode = 'threading')
 @sio.on('checkIn')
 def checkIn(data):
     print("%s connected" % (request.sid))
+    clients = rget("clients")
     clients.append({"ClientSID":request.sid,"ClientUNAME":data})
+    rset("clients", clients)
+    clientDict = rget("clientDict")
     clientDict[request.sid] = len(clients)-1
+    rset("clientDict", clientDict)
     print(clients)
+    del clients
     
 @sio.on('disconnect')
 def disconnect():
+    clients = rget("clients")
+    parties = rget("parties")
+    games = rget("games")
+    clientDict = rget("clientDict")
     print("%s disconnected" % (request.sid))
     print(clients)
     i=0
@@ -52,6 +72,15 @@ def disconnect():
             i2+=1
         i+=1
     del clients[clientDict[request.sid]]
+    rset("clients", clients)
+    rset("parties", parties)
+    rset("games", games)
+    rset("clientDict", clientDict)
+    del clients
+    del parties
+    del games
+    del clientDict
+
 
 @app.route("/")
 def index():
@@ -60,26 +89,40 @@ def index():
 
 @sio.on('startingParty')
 def startingParty(data):
+    parties = rget("parties")
     data=json.loads(data)
     sid = request.sid
     id = hashlib.sha224(os.urandom(16)).hexdigest()
     parties.append({"PartyID":id,"OwnerSID":sid,"OwnerUNAME":data[0],"Members":[[data[0],sid]]})
+    rset("parties", parties)
+    del parties
     sio.emit("hereIsID", {"id":id})
+    chats = r.get("chats")
+    chats[id] = []
+    rset("chats",chats)
+    del chats
 
 
 @sio.on('invitingToParty')
 def invitingToParty(data):
+    parties = rget("parties")
     data=json.loads(data)
     sid = request.sid
+    invites = rget("invites")
     for item in parties:
         if item["OwnerSID"] == sid:
            invites.append({"username":data[0],"partyid":item["PartyID"],"OwnerUNAME":item["OwnerUNAME"]})
+    rset("parties", parties)
+    del parties
+    rset("invites",invites)
+    del invites
 
 
 @sio.on('joinParty')
 def joinParty(data):
     partyID = data[0]
     uname = data[1]
+    parties = rget("parties")
     i=0
     for item in parties:
         if item["PartyID"] == partyID:
@@ -88,9 +131,12 @@ def joinParty(data):
                 for itm in item["Members"]:
                     sio.emit("memberJoiningParty",[uname,item],room=itm[1])
         i+=1
+    rset("parties", parties)
+    del parties
 
 @sio.on("leftParty")
 def leftParty(data):
+    parties = rget("parties")
     i=0
     for item in parties:
         i2=0
@@ -100,9 +146,15 @@ def leftParty(data):
                 sio.emit("memberJoiningParty", [data,item], room=item["PartyID"])
             i2+=1
         i+=1
+    rset("parties", parties)
+    del parties
 @sio.on("sendChat")
 def sendChat(data):
+    chats = rget("chats")
     sio.emit("newMsg", data, room=data["partyID"])
+    chats[data["partyID"]].append(data)
+    rset("chats", chats)
+    del chats
 
 
 @sio.on("room")
@@ -112,12 +164,14 @@ def joinRoom(data):
 
 @sio.on("selectCharacter")
 def selectCharacter(data):
+    clients = rget("clients")
     i=0
     for item in clients:
         if item["ClientUNAME"] == data["UNAME"]:
             clients[i]["SelectedCharacter"] = data["CHARID"]
             break
         i+=1
+    rset("clients",clients)
 
 
 def getDefaultChar(uname):
@@ -127,13 +181,16 @@ def getDefaultChar(uname):
 @sio.on("startGame")
 def startGame(data):
     print(data)
-    global games
+    games= rget("games")
     games.append({"id":data[0],"Members":[]})
     sio.emit("gameStarting","",room=data[0])
+    rset("games",games)
+    del games
 
 
 @sio.on("joinGame")
 def joinGame(data):
+    games = rget("games")
     partyId = data["ID"]
     uname = data["UNAME"]
     charid = data["CHARID"]
@@ -144,11 +201,15 @@ def joinGame(data):
             members = game["Members"]
             print(members)
     sio.emit("playerJoined", members, room=partyId)
+    rset("games",games)
+    del games
 
 
 def reportInvites():
     while True:
         i=0
+        invites = rget("invites")
+        clients = rget("clients")
         for itm in invites:
             uname = itm["username"]
             client = None
@@ -160,6 +221,10 @@ def reportInvites():
                 del invites[i]
                 print("Invited "+uname+" or: "+client["ClientSID"])
             i+=1
+        rset("clients",clients)
+        del clients
+        rset("invites",invites)
+        del invites
 
 
 success=True
@@ -168,6 +233,8 @@ print(sys.argv)
 
 
 if __name__ == "__main__" and len(sys.argv) == 1:
+    rset("invites",[])
+    rset("clients", [])
     reportingThread = threading.Thread(target=reportInvites)
     reportingThread.start()
     sio.run(app,port=3435,host="0.0.0.0",debug=True)
