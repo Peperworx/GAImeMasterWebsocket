@@ -97,7 +97,7 @@ def startingParty(data):
     rset("parties", parties)
     del parties
     sio.emit("hereIsID", {"id":id})
-    chats = r.get("chats")
+    chats = rget("chats")
     chats[id] = []
     rset("chats",chats)
     del chats
