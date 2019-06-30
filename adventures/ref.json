@@ -1,3 +1,12 @@
 [
-  {"name": "Your first adventure","id": 0,"file": "adventures/0-first.json"}
+  {
+    "name": "Your first adventure",
+    "id": 0,
+    "file": "adventures/0-first.json"
+  },
+  {
+    "name": "Falken's Maze",
+    "id": 1,
+    "file": "adventures/falken.json"
+  }
 ]

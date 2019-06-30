@@ -16,7 +16,7 @@
     },
 
     {
-      "id":  "story-pt2",
+      "id": "story-pt2",
       "type": "say",
       "content": "As you approach the entrance, you look around. It's a nice day, and everything seems peaceful. You know that things aren't usualy peaceful in caves where monsters live, and it's usually dark, too. So you get out your lantern and tinder box (matches havent been invented yet, so the box is full of flint and steel), and carefuly light the wick. The flame sputters a bit, but the oil soon burns with a soft glow. With your sword ready, you step into the cave.",
       "branches": [
@@ -25,7 +25,79 @@
           "event": "story-pt3"
         }
       ]
-    }
+    },
+    {
+      "id": "story-pt3",
+      "type": "say",
+      "content": "It's dark and musty inside. A passage leads inward from the entrance, going deeper into the hill. It looks like the only way to go, so you head in that direction, watching carefully for bats and other nasty creatures.",
+      "branches": [
+        {
+          "name": "<br><i>next&gt;</i>",
+          "event": "combat-1"
+        }
+      ]
+    },
+    {
+      "id": "combat-1",
+      "type": "script",
+      "content": "runEvt('combat-1-text')",
+      "branches": [
 
+      ]
+    },
+    {
+      "id": "combat-1-text",
+      "type": "say",
+      "content": "Suddenly, you see a goblin! He is smaller than you are, and looks like an ugly little man with gray skin. He sees you, gives a scream, waves his sword, and attacks! You dodge his blow, and raise your sword to swing.",
+      "branches": [
+        {
+          "name": "<br><i>Swing!&nbsp;</i>",
+          "event": "combat-1-swing"
+        }
+      ]
+    },
+    {
+      "id": "combat-1-monster-miss",
+      "type": "say",
+      "content": "The goblin attacks but misses!",
+      "branches": [
+
+      ]
+    },
+    {
+      "id": "combat-1-swing",
+      "type": "script",
+      "content": "runEvt('combat-1-monster-miss');if(Math.floor(Math.random() * Math.floor(20)) > 11){runEvt('combat-1-win')}else{runEvt('combat-1-miss')}",
+      "branches": [
+
+      ]
+    },
+    {
+      "id": "combat-1-win",
+      "type": "say",
+      "content": "You hit the goblin and it runs away!",
+      "branches": [
+        {
+          "name": "<br><i>next&gt;</i>",
+          "event": "story-pt4"
+        }
+      ]
+    },
+    {
+      "id": "combat-1-miss",
+      "type": "say",
+      "content": "You swing your sword but you miss!",
+      "branches": [
+        {
+          "name": "<br><i>Swing Again!</i>",
+          "event": "combat-1-swing"
+        }
+      ]
+    },
+    {
+      "id": "story-pt4",
+      "type": "say",
+      "content":  "You stop for a moment to be sure that you are right, and then continue down the corridor. There are no side passages, no other ways to go. (END FOR NOW)"
+    }
   ]
 }

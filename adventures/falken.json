@@ -1,0 +1,14 @@
+{
+  "name": "Falken's Maze",
+  "id": 1,
+  "initEvt": "games",
+  "events": [
+    {
+      "id": "games",
+      "type": "say",
+      "content": "<br>Login: List Games<br>Chess<br>Checkers<br>",
+      "branches": []
+      ]
+    }
+  ]
+}

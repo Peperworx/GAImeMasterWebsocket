@@ -36,6 +36,8 @@ sio = SocketIO(app,async_mode = 'threading')
 def handleEvent(event,adventure,id):
     if event["type"] == "say":
         sio.emit("gmSay",json.dumps(event),room=id)
+    elif event["type"] == "script":
+        sio.emit("gmScript",json.dumps(event),room=id)
     print(event["type"])
 
 
