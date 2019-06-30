@@ -1,0 +1,31 @@
+{
+  "name": "Your first adventure",
+  "id": 0,
+  "initEvt": "story-pt1",
+  "events": [
+    {
+      "id": "story-pt1",
+      "type": "say",
+      "content": "Your home town is just a small place with dirt roads. You set off one morning and hike to the nearby hills. There are several caves in the hills, caves where treasures can be found, guarded by monsters. You have heard that a man named Bargle may also be found in these caves. Bargle is a sort of bandit,l who has been stealing money, killing people, and terrorizing your town. If you can catch him, you can become a hero!",
+      "branches": [
+        {
+          "name": "<br><i>next&gt;</i>",
+          "event": "story-pt2"
+        }
+      ]
+    },
+
+    {
+      "id":  "story-pt2",
+      "type": "say",
+      "content": "As you approach the entrance, you look around. It's a nice day, and everything seems peaceful. You know that things aren't usualy peaceful in caves where monsters live, and it's usually dark, too. So you get out your lantern and tinder box (matches havent been invented yet, so the box is full of flint and steel), and carefuly light the wick. The flame sputters a bit, but the oil soon burns with a soft glow. With your sword ready, you step into the cave.",
+      "branches": [
+        {
+          "name": "<br><i>next&gt;</i>",
+          "event": "story-pt3"
+        }
+      ]
+    }
+
+  ]
+}
