@@ -1,0 +1,59 @@
+/*
+    {
+      "id": "combat-1",
+      "type": "script",
+      "content": "runEvt('combat-1-text')",
+      "branches": [
+
+      ]
+    },
+    {
+      "id": "combat-1-text",
+      "type": "say",
+      "content": "Suddenly, you see a goblin! He is smaller than you are, and looks like an ugly little man with gray skin. He sees you, gives a scream, waves his sword, and attacks! You dodge his blow, and raise your sword to swing.",
+      "branches": [
+        {
+          "name": "<br><i>Swing!&nbsp;</i>",
+          "event": "combat-1-swing"
+        }
+      ]
+    },
+    {
+      "id": "combat-1-monster-miss",
+      "type": "say",
+      "content": "The goblin attacks but misses!",
+      "branches": [
+
+      ]
+    },
+    {
+      "id": "combat-1-swing",
+      "type": "script",
+      "content": "runEvt('combat-1-monster-miss');if(Math.floor(Math.random() * Math.floor(20)) > 11){runEvt('combat-1-win')}else{runEvt('combat-1-miss')}",
+      "branches": [
+
+      ]
+    },
+    {
+      "id": "combat-1-win",
+      "type": "say",
+      "content": "You hit the goblin and it runs away!",
+      "branches": [
+        {
+          "name": "<br><i>next&gt;</i>",
+          "event": "story-pt4"
+        }
+      ]
+    },
+    {
+      "id": "combat-1-miss",
+      "type": "say",
+      "content": "You swing your sword but you miss!",
+      "branches": [
+        {
+          "name": "<br><i>Swing Again!</i>",
+          "event": "combat-1-swing"
+        }
+      ]
+    },
+    */

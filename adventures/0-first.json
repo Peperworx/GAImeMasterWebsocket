@@ -38,66 +38,56 @@
       ]
     },
     {
-      "id": "combat-1",
-      "type": "script",
-      "content": "runEvt('combat-1-text')",
-      "branches": [
-
-      ]
-    },
-    {
-      "id": "combat-1-text",
-      "type": "say",
-      "content": "Suddenly, you see a goblin! He is smaller than you are, and looks like an ugly little man with gray skin. He sees you, gives a scream, waves his sword, and attacks! You dodge his blow, and raise your sword to swing.",
-      "branches": [
-        {
-          "name": "<br><i>Swing!&nbsp;</i>",
-          "event": "combat-1-swing"
-        }
-      ]
-    },
-    {
-      "id": "combat-1-monster-miss",
-      "type": "say",
-      "content": "The goblin attacks but misses!",
-      "branches": [
-
-      ]
-    },
-    {
-      "id": "combat-1-swing",
-      "type": "script",
-      "content": "runEvt('combat-1-monster-miss');if(Math.floor(Math.random() * Math.floor(20)) > 11){runEvt('combat-1-win')}else{runEvt('combat-1-miss')}",
-      "branches": [
-
-      ]
-    },
-    {
-      "id": "combat-1-win",
-      "type": "say",
-      "content": "You hit the goblin and it runs away!",
-      "branches": [
-        {
-          "name": "<br><i>next&gt;</i>",
-          "event": "story-pt4"
-        }
-      ]
-    },
-    {
-      "id": "combat-1-miss",
-      "type": "say",
-      "content": "You swing your sword but you miss!",
-      "branches": [
-        {
-          "name": "<br><i>Swing Again!</i>",
-          "event": "combat-1-swing"
-        }
-      ]
-    },
-    {
-      "id": "story-pt4",
-      "type": "say",
-      "content":  "You stop for a moment to be sure that you are right, and then continue down the corridor. There are no side passages, no other ways to go. (END FOR NOW)"
+      "id":"combat-1",
+      "type": "MonsterCombat",
+      "content": {
+        "MonsterName":"Goblin",
+        "MonsterType":"",
+        "Advantage": "player",
+        "Appear":
+        [
+          "Suddenly, you see a goblin! He is smaller than you are, and looks like an ugly little man with gray skin. He sees you, gives a scream, waves his sword, and attacks! You dodge his blow, and raise your sword to swing."
+        ],
+        "FirstBranch":
+        [
+          "<br><i>Swing!</i>",
+          "player-swing"
+        ],
+        "PlayerMiss":
+        [
+          "You swing your sword but you miss!",
+          "monster-swing"
+        ],
+        "PlayersMiss":
+        [
+          "{{ playername }} swings their sword but they miss!",
+          "next-player-swing"
+        ],
+        "PlayerHit":[
+          "You hit the goblin and it runs away!",
+          "monster-runs-away"
+        ],
+        "PlayersHit":
+        [
+          "{{ playername }} hits the goblin and it runs away!",
+          "monster-runs-away"
+        ],
+        "MonsterSwing":{
+          "AlwaysMiss": true,
+          "miss": [
+            "The goblin attacks but misses!"
+          ],
+          "hit": [
+            "",
+            "0d0"
+          ]
+        },
+        "RunsAway":[
+          "story-pt4"
+        ]
+        
+      }
     }
+    
   ]
 }

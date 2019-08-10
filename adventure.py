@@ -34,10 +34,22 @@ sio = SocketIO(app,async_mode = 'threading')
 
 
 def handleEvent(event,adventure,id):
+    games = rget("games")
+    thisgame = None
+    i=0
+    for game in games:
+        if game["id"] == id:
+            thisgame = i
+            break
+        i+=1
     if event["type"] == "say":
         sio.emit("gmSay",json.dumps(event),room=id)
     elif event["type"] == "script":
         sio.emit("gmScript",json.dumps(event),room=id)
+    elif event["type"] == "MonsterCombat":
+        games[thisgame]["combat"] = True
+        sio.emit("startCombat",json.dumps(event),room=id)
+    rset("games", games)
     print(event["type"])
 
 
@@ -88,7 +100,6 @@ def runEvent(data):
         if event["id"] == data["eventID"]:
             print("Handling")
             handleEvent(event,advfile,data["gid"])
-
 
 
 
