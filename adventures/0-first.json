@@ -43,6 +43,7 @@
       "content": {
         "MonsterName":"Goblin",
         "MonsterType":"",
+        "MonsterAttackRoll":"1d8",
         "Advantage": "player",
         "Appear":
         [
@@ -87,6 +88,17 @@
         ]
         
       }
+    },
+    {
+      "id": "story-pt4",
+      "type": "say",
+      "content": "pt4",
+      "branches": [
+        {
+          "name": "<br><i>next&gt;</i>",
+          "event": "pt-5"
+        }
+      ]
     }
     
   ]

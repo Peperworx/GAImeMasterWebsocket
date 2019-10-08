@@ -15,7 +15,7 @@ from flask_socketio import SocketIO, emit, join_room
 
 
 
-r = redis.Redis(host='192.168.1.246', port=6379, db=0)
+r = redis.Redis(host='127.0.0.1', port=6379, db=0)
 def rset(key,value):
     r.set(key, json.dumps(value))
 
@@ -71,6 +71,12 @@ def disconnect():
                 sio.emit("playerJoined", games[i]["Members"], room=id)
             i2+=1
         i+=1
+    i=0
+    for client in clients:
+        if client["ClientSID"] == request.sid:
+            del clients[i]
+            break
+        i=0
     del clients[clientDict[request.sid]]
     rset("clients", clients)
     rset("parties", parties)
@@ -105,6 +111,7 @@ def startingParty(data):
 
 @sio.on('invitingToParty')
 def invitingToParty(data):
+    
     parties = rget("parties")
     data=json.loads(data)
     sid = request.sid
@@ -216,6 +223,7 @@ def reportInvites():
             for item in clients:
                 if item["ClientUNAME"] == uname:
                     client = item
+                    
             if client != None:
                 sio.emit("invitedToParty", {"PartyID":str(itm["partyid"]),"OwnerUNAME":json.dumps(itm["OwnerUNAME"]),"Party":json.dumps(itm)},room=client["ClientSID"])
                 del invites[i]
