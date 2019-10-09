@@ -77,7 +77,7 @@ def disconnect():
             del clients[i]
             break
         i=0
-    del clients[clientDict[request.sid]]
+    #del clients[clientDict[request.sid]]
     rset("clients", clients)
     rset("parties", parties)
     rset("games", games)
