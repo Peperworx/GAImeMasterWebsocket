@@ -32,7 +32,7 @@ def rget(key):
 #clientDict = {}
 from multiprocessing import Process
 app = Flask(__name__)
-sio = SocketIO(app,async_mode = 'threading')
+sio = SocketIO(app,async_mode = 'threading',cors_allowed_origins="*")
 
 
 # Handling Checkin (Handshake)
