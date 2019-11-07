@@ -443,7 +443,7 @@ if __name__ == "__main__" and len(sys.argv) == 1:
     rset("clients", [])
     reportingThread = threading.Thread(target=reportInvites)
     reportingThread.start()
-    sio.run(app,port=3435,host="0.0.0.0",debug=True)
+    sio.run(app,port=3435,host="0.0.0.0",debug=True, cors_allowed_origins="*")
     reportingThread.join()
 elif len(sys.argv) > 1:
     if sys.argv[1] == "test":

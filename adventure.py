@@ -107,4 +107,4 @@ def runEvent(data):
 def joinRoom(data):
     join_room(data)
 
-sio.run(app,port=3436,host="0.0.0.0",debug=True)
+sio.run(app,port=3436,host="0.0.0.0",debug=True, cors_allowed_origins="*")
