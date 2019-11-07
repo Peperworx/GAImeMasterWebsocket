@@ -15,7 +15,7 @@ from flask_socketio import SocketIO, emit, join_room
 
 
 
-r = redis.Redis(host='192.168.1.246', port=6379, db=0)
+r = redis.Redis(host='127.0.0.1', port=6379, db=0)
 def rset(key,value):
     r.set(key, json.dumps(value))
 
