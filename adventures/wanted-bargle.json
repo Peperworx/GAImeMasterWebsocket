@@ -1,0 +1,11 @@
+{
+    "name": "Wanted: Bargle",
+    "id": 2,
+    "initEvt": "entry",
+    "events": [{
+        "id": "entry",
+        "type": "say",
+        "content": "Wanted-Bargle",
+        "branches": []
+    }]
+}

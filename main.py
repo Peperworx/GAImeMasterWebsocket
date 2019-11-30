@@ -32,7 +32,7 @@ def rget(key):
 #clientDict = {}
 from multiprocessing import Process
 app = Flask(__name__)
-sio = SocketIO(app,async_mode = 'threading',cors_allowed_origins="*")
+sio = SocketIO(app,async_mode = 'threading', cors_allowed_origins="*")
 
 
 # Handling Checkin (Handshake)
@@ -62,7 +62,24 @@ def checkIn(data):
     # Delete list of clients
     del clients
 
+@sio.on('needId')
+def needId():
+    sid = request.sid
 
+    # Get list of parties from redis
+    parties = rget("parties")
+
+    # Set partyid to none
+    partyid = None
+
+    for party in parties:
+        for member in party["Members"]:
+            if member[1] == sid:
+                partyid = party["PartyID"]
+                sio.emit("hereIsID", partyid, room=sid)
+                break
+    
+        
 
 # Handle client disconnecting
 @sio.on('disconnect')
@@ -77,8 +94,8 @@ def disconnect():
     # Get list of games from redis
     games = rget("games")
 
-
-    #clientDict = rget("clientDict")
+    # Get dicitonary of clients from redis
+    clientDict = rget("clientDict")
     
     # Print "(Client sid) disconnected" (debug only)
     print("%s disconnected" % (request.sid))
@@ -229,17 +246,20 @@ def invitingToParty(data):
     parties = rget("parties")
     data=json.loads(data)
     invites = rget("invites")
+    clients = rget("clients")
 
     # Get sid
     sid = request.sid
 
-    # Loop through parties
-    for item in parties:
-
-        # If the owners SID == the clients sid
-        if item["OwnerSID"] == sid:
-            # Add client to list of invites
-            invites.append({"username":data[0],"partyid":item["PartyID"],"OwnerUNAME":item["OwnerUNAME"]})
+    print(data)
+    for party in parties:
+        if party["OwnerUNAME"] == data[1]:
+            for client in clients:
+                if client["ClientUNAME"] == data[0]:
+                    sio.emit("invitedToParty", {"PartyID":str(party["PartyID"]),"OwnerUNAME":json.dumps(party["OwnerUNAME"]),"Party":json.dumps(party)},room=client["ClientSID"])
+                    print("Invited "+data[0])
+                    break
+            break
     
     # Update parties on redis
     rset("parties", parties)
